@@ -111,11 +111,53 @@ public class Train {
      
      int getNextActionE_SoftMax(int state)
      {
-    	 //https://en.wikipedia.org/wiki/Softmax_function
-         //この部分はまだ理解できないので、ここは代用
-     	int selectAction = 1;
-    
-     	
+    	int softmaxDiv = 1;
+     	int selectAction = -1;
+     	double[] prob = new double[st.actionLength];
+     	double sumProb = 0;
+     	int action_softmax;
+     	for(action_softmax = 0 ; action_softmax < st.actionLength ; action_softmax ++ )
+     	{
+     		if(validAction(state, action_softmax) == false){
+     			prob[action_softmax] = 0;
+     			continue;
+     		}
+     		else{
+	     		double temp =1.0 * (st.qValues[state][action_softmax] / softmaxDiv);
+	     		prob[action_softmax] = Math.exp(temp);
+	     		sumProb += prob[action_softmax];
+     		}
+     	}
+     	for(action_softmax = 0 ; action_softmax <  st.actionLength ; action_softmax ++ ){
+     		if(validAction(state, action_softmax) == false){
+     			continue;
+     		}
+     	    prob[action_softmax] = prob[action_softmax] / sumProb;
+     	}
+        boolean valid = false;
+     	while(valid == false)
+     	{
+     		double rndValue;
+      		double offset;
+     		rndValue =RandomNumber.nextDouble();
+     		offset = 0;
+     		for(action_softmax = 0 ; action_softmax <  st.actionLength ; action_softmax ++ ) 
+     		{
+
+     			if(validAction(state, action_softmax) == false){
+         			continue;
+         		}
+     			if( rndValue > offset && rndValue < (offset + prob[action_softmax]))
+     				selectAction = action_softmax;
+     			offset += prob[action_softmax];
+     		}
+
+     		if(this.validAction(state, selectAction))
+     		{
+     			valid = true;
+     		}
+     		break;
+     	}
      	return selectAction;
      }
 }
